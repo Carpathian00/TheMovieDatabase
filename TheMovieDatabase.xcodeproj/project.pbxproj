@@ -6,6 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B5A2A0EE2E41E78F001D8C9A /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A0ED2E41E78F001D8C9A /* RxCocoa */; };
+		B5A2A0F02E41E78F001D8C9A /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A0EF2E41E78F001D8C9A /* RxRelay */; };
+		B5A2A0F22E41E78F001D8C9A /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A0F12E41E78F001D8C9A /* RxSwift */; };
+		B5A2A0F52E41E8DC001D8C9A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A0F42E41E8DC001D8C9A /* Nuke */; };
+		B5A2A1542E420761001D8C9A /* XLPagerTabStrip in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A1532E420761001D8C9A /* XLPagerTabStrip */; };
+		B5A2A1652E423FD1001D8C9A /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A1642E423FD1001D8C9A /* NukeUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		B58F44032E40E35E00E0EC84 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +74,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5A2A1542E420761001D8C9A /* XLPagerTabStrip in Frameworks */,
+				B5A2A0F22E41E78F001D8C9A /* RxSwift in Frameworks */,
+				B5A2A0F02E41E78F001D8C9A /* RxRelay in Frameworks */,
+				B5A2A1652E423FD1001D8C9A /* NukeUI in Frameworks */,
+				B5A2A0EE2E41E78F001D8C9A /* RxCocoa in Frameworks */,
+				B5A2A0F52E41E8DC001D8C9A /* Nuke in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +140,12 @@
 			);
 			name = TheMovieDatabase;
 			packageProductDependencies = (
+				B5A2A0ED2E41E78F001D8C9A /* RxCocoa */,
+				B5A2A0EF2E41E78F001D8C9A /* RxRelay */,
+				B5A2A0F12E41E78F001D8C9A /* RxSwift */,
+				B5A2A0F42E41E8DC001D8C9A /* Nuke */,
+				B5A2A1532E420761001D8C9A /* XLPagerTabStrip */,
+				B5A2A1642E423FD1001D8C9A /* NukeUI */,
 			);
 			productName = TheMovieDatabase;
 			productReference = B58F43EC2E40E35C00E0EC84 /* TheMovieDatabase.app */;
@@ -208,6 +229,11 @@
 			);
 			mainGroup = B58F43E32E40E35C00E0EC84;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */,
+				B5A2A0F32E41E8DC001D8C9A /* XCRemoteSwiftPackageReference "Nuke" */,
+				B5A2A1522E420761001D8C9A /* XCRemoteSwiftPackageReference "XLPagerTabStrip" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B58F43ED2E40E35C00E0EC84 /* Products */;
 			projectDirPath = "";
@@ -297,6 +323,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -325,6 +352,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -569,6 +597,66 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.9.0;
+			};
+		};
+		B5A2A0F32E41E8DC001D8C9A /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Nuke";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+		B5A2A1522E420761001D8C9A /* XCRemoteSwiftPackageReference "XLPagerTabStrip" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/xmartlabs/XLPagerTabStrip";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B5A2A0ED2E41E78F001D8C9A /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		B5A2A0EF2E41E78F001D8C9A /* RxRelay */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxRelay;
+		};
+		B5A2A0F12E41E78F001D8C9A /* RxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
+		};
+		B5A2A0F42E41E8DC001D8C9A /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5A2A0F32E41E8DC001D8C9A /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		B5A2A1532E420761001D8C9A /* XLPagerTabStrip */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5A2A1522E420761001D8C9A /* XCRemoteSwiftPackageReference "XLPagerTabStrip" */;
+			productName = XLPagerTabStrip;
+		};
+		B5A2A1642E423FD1001D8C9A /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5A2A0F32E41E8DC001D8C9A /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B58F43E42E40E35C00E0EC84 /* Project object */;
 }
