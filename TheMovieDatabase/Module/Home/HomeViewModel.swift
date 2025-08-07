@@ -90,6 +90,10 @@ class HomeViewModel {
             .disposed(by: disposeBag)
     }
     
+    func reloadSearch(homeType: HomeType) {
+        search(query: searchText.value, type: homeType.rawValue)
+    }
+    
     func search(query: String?, type: String) {
         guard let query = query, !query.isEmpty else {
             searchedItemList.accept([])

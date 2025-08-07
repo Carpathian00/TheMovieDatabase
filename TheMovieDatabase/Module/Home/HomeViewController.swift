@@ -152,6 +152,11 @@ class HomeViewController: UIViewController {
     }
     
     func configEndpointAndHit() {
+        if isSearching {
+            viewModel.reloadSearch(homeType: homeType)
+            return
+        }
+        
         viewModel.currentPage = 1
         
         switch homeType {
