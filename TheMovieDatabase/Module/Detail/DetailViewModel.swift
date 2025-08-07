@@ -121,7 +121,7 @@ class DetailViewModel {
     }
     
     func getReviewData() {
-        isReviewLoading = true
+        if reviewError != nil { isReviewLoading = true }
         reloadPageSections([.reviews])
 
         let reviewFetch: Single<ReviewModel?> = {
