@@ -142,6 +142,13 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         
         return header
     }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        guard let sectionType = DetailTableSection(rawValue: section), sectionType == .reviews else {
+            return 0
+        }
+        return 44
+    }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let sectionType = DetailTableSection(rawValue: indexPath.section)
