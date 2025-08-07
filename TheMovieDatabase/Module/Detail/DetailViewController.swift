@@ -54,9 +54,14 @@ class DetailViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        self.navigationController?.navigationBar.tintColor = .label
+        self.title = "Details"
+        self.navigationController?.navigationBar.tintColor = .white
         self.navigationController?.navigationItem.largeTitleDisplayMode = .never
         self.navigationController?.navigationBar.prefersLargeTitles = false
+        
+        self.navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: UIColor.white
+        ]
     }
     
     private func setupTableView() {
@@ -92,13 +97,6 @@ class DetailViewController: UIViewController {
                 DispatchQueue.main.async {
                     self?.movieDetailLayout.reloadData()
                 }
-            })
-            .disposed(by: disposeBag)
-        
-        viewModel.onReloadAll
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] in
-                self?.movieDetailLayout.reloadData()
             })
             .disposed(by: disposeBag)
         

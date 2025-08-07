@@ -22,8 +22,7 @@ class DetailViewModel {
     
     // UI Update
     var onReloadSections = PublishRelay<([Int])>()
-    let onReloadAll = PublishRelay<Void>()
-
+    
     // Class Utility
     var currentReviewPage = 1
     let repository: MovieAndTvRepositoryProtocol
@@ -34,7 +33,9 @@ class DetailViewModel {
     var detailError: NetworkError? = nil
     var movieDetail: MovieDetail? = nil
     var tvDetail: TVDetail? = nil
+    
     var trailerData: TrailerResult? = nil
+    
     var isReviewLoading: Bool = false
     var reviewsData: [ReviewItem] = []
     var reviewError: NetworkError? = nil
