@@ -8,6 +8,7 @@
 import UIKit
 import WebKit
 import RxSwift
+import MBProgressHUD
 
 class DetailViewController: UIViewController {
     // UI Components
@@ -23,10 +24,13 @@ class DetailViewController: UIViewController {
         table.register(UINib(nibName: "TrailerTableViewCell", bundle: nil), forCellReuseIdentifier: TrailerTableViewCell.identifier)
         table.register(UINib(nibName: "MovieDetailTableViewCell", bundle: nil), forCellReuseIdentifier: MovieDetailTableViewCell.identifier)
         table.register(UINib(nibName: "ReviewTableViewCell", bundle: nil), forCellReuseIdentifier: ReviewTableViewCell.identifier)
+        table.register(ErrorCell.self, forCellReuseIdentifier: ErrorCell.identifier)
         table.register(LoadMoreReviewCell.self, forCellReuseIdentifier: LoadMoreReviewCell.identifier)
+        table.register(LoadingCell.self, forCellReuseIdentifier: LoadingCell.identifier)
         
         return table
     }()
+    private var hud: MBProgressHUD?
     
     // Class Utility
     private let disposeBag = DisposeBag()
@@ -69,13 +73,25 @@ class DetailViewController: UIViewController {
         movieDetailLayout.dataSource = self
     }
     
+    private func showLoadingIndicator() {
+        hud = MBProgressHUD.showAdded(to: self.view, animated: true)
+        hud?.label.text = "Loading..."
+        hud?.mode = .indeterminate
+    }
+    
     private func bindViewModel() {
+        showLoadingIndicator()
+        
         viewModel.onReloadSections
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] (sectionIndices, animation) in
-                let indexSet = IndexSet(sectionIndices)
-                self?.movieDetailLayout.reloadData()
-                self?.movieDetailLayout.reloadSections(indexSet, with: animation)
+            .subscribe(onNext: { [weak self] sectionIndices in
+                if sectionIndices.contains(1) {
+                    self?.hud?.hide(animated: true)
+                }
+                
+                DispatchQueue.main.async {
+                    self?.movieDetailLayout.reloadData()
+                }
             })
             .disposed(by: disposeBag)
         
@@ -92,11 +108,15 @@ class DetailViewController: UIViewController {
 
 extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
+        if let _ = viewModel.detailError { return 1 }
+        
         return DetailTableSection.allCases.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionType = DetailTableSection(rawValue: section)
+        
+        if let _ = viewModel.detailError { return 1 }
         
         switch sectionType {
         case .trailer:
@@ -104,6 +124,9 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         case .detail:
             return 1
         case .reviews:
+            if viewModel.isReviewLoading { return 1 }
+            if let _ = viewModel.reviewError { return 1 }
+            
             let count = viewModel.reviewsData.count
             return viewModel.hasMoreReviewPages ? count + 1 : count
         case nil:
@@ -131,18 +154,28 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         
         switch sectionType {
         case .trailer:
-            if viewModel.trailerData?.key == nil {
-                return 330
-            }
-            return UITableView.automaticDimension
+            if viewModel.trailerData?.key == nil { return 330 }
+        case .detail:
+            if viewModel.isDetailLoading { return 340 }
+        case .reviews:
+            if viewModel.isReviewLoading { return 200 }
         default:
             return UITableView.automaticDimension
         }
+        
+        return UITableView.automaticDimension
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // Error Case
+        if let detailError = viewModel.detailError {
+            return getErrorCell(indexPath, error: detailError) {
+                self.hud?.show(animated: false)
+                self.viewModel.loadInitialData()
+            }
+        }
+
         let sectionType = DetailTableSection(rawValue: indexPath.section)
-        
         switch sectionType {
         case .trailer:
             guard let cell = movieDetailLayout.dequeueReusableCell(withIdentifier: TrailerTableViewCell.identifier, for: indexPath) as? TrailerTableViewCell else { return UITableViewCell() }
@@ -155,6 +188,11 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
             
             return cell
         case .detail:
+            // Loading Case
+            if viewModel.isDetailLoading {
+                return getLoadingCell(indexPath)
+            }
+            
             guard let cell = movieDetailLayout.dequeueReusableCell(withIdentifier: MovieDetailTableViewCell.identifier, for: indexPath) as? MovieDetailTableViewCell else { return UITableViewCell() }
 
             if viewModel.type == .movie {
@@ -165,6 +203,18 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
             return cell
             
         case .reviews:
+            // Review Loading Case
+            if viewModel.isReviewLoading {
+                return getLoadingCell(indexPath)
+            }
+            
+            // Review Error Case
+            if let reviewError = viewModel.reviewError {
+                return getErrorCell(indexPath, error: reviewError) {
+                    self.viewModel.getReviewData()
+                }
+            }
+            
             let isLastRow = indexPath.row == viewModel.reviewsData.count
 
             if viewModel.reviewsData.isEmpty {
@@ -196,6 +246,26 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         case nil:
             return UITableViewCell()
         }
+    }
+    
+    private func getLoadingCell(_ indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = movieDetailLayout.dequeueReusableCell(withIdentifier: LoadingCell.identifier, for: indexPath) as? LoadingCell else { return UITableViewCell() }
+        cell.spinner.startAnimating()
+        return cell
+    }
+    
+    private func getErrorCell(_ indexPath: IndexPath, error: NetworkError, retryCompletion: @escaping (() -> ())) -> UITableViewCell {
+        guard let cell = movieDetailLayout.dequeueReusableCell(withIdentifier: ErrorCell.identifier, for: indexPath) as? ErrorCell else { return UITableViewCell() }
+        cell.configure(
+            logo: UIImage(systemName: "exclamationmark.triangle"),
+            title: error.description)
+        
+        cell.retryButton.rx.tap.bind {
+            retryCompletion()
+        }
+        .disposed(by: disposeBag)
+        
+        return cell
     }
 }
 

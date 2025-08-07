@@ -38,6 +38,7 @@ class ReviewTableViewCell: UITableViewCell {
         self.selectionStyle = .none
         mainContainer.layer.cornerRadius = 8
         mainContainer.backgroundColor = .systemGray6
+        userAvatar.layer.cornerRadius = userAvatar.bounds.height / 2
         scoreContainer.layer.cornerRadius = 8
         starIcon.image = UIImage(systemName: "star.fill")
         starIcon.contentMode = .scaleAspectFit
@@ -54,7 +55,7 @@ class ReviewTableViewCell: UITableViewCell {
     }
     
     func configure(with review: ReviewItem, isExpanded: Bool) {
-        userAvatar.setImage(with: URL(string: review.authorDetails?.avatarPath ?? ""), placeholder: UIImage(systemName: "person.fill"))
+        userAvatar.setImage(with: URL(string: "https://media.themoviedb.org/t/p/w300_and_h300_face/" + (review.authorDetails?.avatarPath ?? "")), placeholder: UIImage(systemName: "person.fill"))
         usernameLabel.text = review.authorDetails?.username ?? review.author ?? "Unknown"
         reviewText.text = review.content
         dateLabel.text = formattedDate(from: review.createdAt)

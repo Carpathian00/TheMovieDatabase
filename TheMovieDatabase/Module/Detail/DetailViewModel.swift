@@ -21,7 +21,7 @@ class DetailViewModel {
     let type: HomeType
     
     // UI Update
-    internal var onReloadSections = PublishRelay<([Int], UITableView.RowAnimation)>()
+    var onReloadSections = PublishRelay<([Int])>()
     let onReloadAll = PublishRelay<Void>()
 
     // Class Utility
@@ -30,10 +30,14 @@ class DetailViewModel {
     private let disposeBag = DisposeBag()
     
     // Data
+    var isDetailLoading: Bool = false
+    var detailError: NetworkError? = nil
     var movieDetail: MovieDetail? = nil
     var tvDetail: TVDetail? = nil
     var trailerData: TrailerResult? = nil
+    var isReviewLoading: Bool = false
     var reviewsData: [ReviewItem] = []
+    var reviewError: NetworkError? = nil
     var hasMoreReviewPages: Bool = true
     
     init(id: Int, type: HomeType, repository: MovieAndTvRepositoryProtocol) {
@@ -53,12 +57,13 @@ class DetailViewModel {
         getReviewData()
     }
     
-    private func reloadPageSections(_ sections: [DetailTableSection]? = nil, withAnimation: Bool = false) {
+    private func reloadPageSections(_ sections: [DetailTableSection]? = nil) {
         let indexSet = (sections ?? DetailTableSection.allCases).compactMap {
             return $0.rawValue
         }
-        self.onReloadSections.accept((indexSet, withAnimation ? .automatic : .none))
+        self.onReloadSections.accept((indexSet))
     }
+    
     func getTrailerData() {
         repository.fetchTrailerData(id: id)
             .observe(on: MainScheduler.instance)
@@ -73,32 +78,51 @@ class DetailViewModel {
     }
     
     func getMovieDetail() {
+        isDetailLoading = true
+        reloadPageSections([.detail])
+
         repository.fetchMovieDetail(id: id)
             .observe(on: MainScheduler.instance)
             .subscribe(onSuccess: { [weak self] detail in
+                self?.detailError = nil
                 self?.movieDetail = detail
+                self?.isDetailLoading = false
                 self?.reloadPageSections([.detail])
             }, onFailure: { error in
                 print("Movie detail fetch error:", error)
+                let errorCode = ErrorMapper.map(error)
+                self.detailError = errorCode
+                self.isDetailLoading = false
                 self.reloadPageSections([.detail])
             })
             .disposed(by: disposeBag)
     }
     
     func getTVDetail() {
+        isDetailLoading = true
+        reloadPageSections([.detail])
+
         repository.fetchTvDetail(id: id)
             .observe(on: MainScheduler.instance)
             .subscribe(onSuccess: { [weak self] detail in
+                self?.detailError = nil
                 self?.tvDetail = detail
+                self?.isDetailLoading = false
                 self?.reloadPageSections([.detail])
             }, onFailure: { error in
                 print("TV detail fetch error:", error)
+                let errorCode = ErrorMapper.map(error)
+                self.detailError = errorCode
+                self.isDetailLoading = false
                 self.reloadPageSections([.detail])
             })
             .disposed(by: disposeBag)
     }
     
     func getReviewData() {
+        isReviewLoading = true
+        reloadPageSections([.reviews])
+
         let reviewFetch: Single<ReviewModel?> = {
             switch type {
             case .movie:
@@ -112,12 +136,16 @@ class DetailViewModel {
             .observe(on: MainScheduler.instance)
             .subscribe(onSuccess: { [weak self] result in
                 guard let self = self, let results = result?.results else { return }
-                
+                self.reviewError = nil
                 self.hasMoreReviewPages = result?.hasMorePage ?? false
                 self.reviewsData += results
+                self.isReviewLoading = false
                 self.reloadPageSections([.reviews])
             }, onFailure: { error in
                 print("Reviews fetch error:", error)
+                let errorCode = ErrorMapper.map(error)
+                self.reviewError = errorCode
+                self.isReviewLoading = false
                 self.reloadPageSections([.reviews])
             })
             .disposed(by: disposeBag)
