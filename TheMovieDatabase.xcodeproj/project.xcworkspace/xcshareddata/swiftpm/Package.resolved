@@ -1,5 +1,5 @@
 {
-  "originHash" : "97fc108d221a232b668c426fd1b04e47d3da04fbc3cd7579e7e1d99ad2cb22c0",
+  "originHash" : "c369420621429266b02e59c2eb19f92f1d8e6230465f86360dd9ae56916ab751",
   "pins" : [
     {
       "identity" : "fxpagecontrol",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "a94633402ba98c52f86c2a70e61ff086dec9de78",
         "version" : "1.6.0"
+      }
+    },
+    {
+      "identity" : "mbprogresshud?tab=readme-ov-file",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jdg/MBProgressHUD?tab=readme-ov-file",
+      "state" : {
+        "revision" : "bca42b801100b2b3a4eda0ba8dd33d858c780b0d",
+        "version" : "1.2.0"
       }
     },
     {

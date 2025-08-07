@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B5A083452E446263007D4BB0 /* MBProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = B5A083442E446263007D4BB0 /* MBProgressHUD */; };
 		B5A2A0EE2E41E78F001D8C9A /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A0ED2E41E78F001D8C9A /* RxCocoa */; };
 		B5A2A0F02E41E78F001D8C9A /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A0EF2E41E78F001D8C9A /* RxRelay */; };
 		B5A2A0F22E41E78F001D8C9A /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B5A2A0F12E41E78F001D8C9A /* RxSwift */; };
@@ -77,6 +78,7 @@
 				B5A2A1542E420761001D8C9A /* XLPagerTabStrip in Frameworks */,
 				B5A2A0F22E41E78F001D8C9A /* RxSwift in Frameworks */,
 				B5A2A0F02E41E78F001D8C9A /* RxRelay in Frameworks */,
+				B5A083452E446263007D4BB0 /* MBProgressHUD in Frameworks */,
 				B5A2A1652E423FD1001D8C9A /* NukeUI in Frameworks */,
 				B5A2A0EE2E41E78F001D8C9A /* RxCocoa in Frameworks */,
 				B5A2A0F52E41E8DC001D8C9A /* Nuke in Frameworks */,
@@ -146,6 +148,7 @@
 				B5A2A0F42E41E8DC001D8C9A /* Nuke */,
 				B5A2A1532E420761001D8C9A /* XLPagerTabStrip */,
 				B5A2A1642E423FD1001D8C9A /* NukeUI */,
+				B5A083442E446263007D4BB0 /* MBProgressHUD */,
 			);
 			productName = TheMovieDatabase;
 			productReference = B58F43EC2E40E35C00E0EC84 /* TheMovieDatabase.app */;
@@ -233,6 +236,7 @@
 				B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */,
 				B5A2A0F32E41E8DC001D8C9A /* XCRemoteSwiftPackageReference "Nuke" */,
 				B5A2A1522E420761001D8C9A /* XCRemoteSwiftPackageReference "XLPagerTabStrip" */,
+				B5A083432E446263007D4BB0 /* XCRemoteSwiftPackageReference "MBProgressHUD" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B58F43ED2E40E35C00E0EC84 /* Products */;
@@ -599,6 +603,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B5A083432E446263007D4BB0 /* XCRemoteSwiftPackageReference "MBProgressHUD" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jdg/MBProgressHUD?tab=readme-ov-file";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
 		B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ReactiveX/RxSwift";
@@ -626,6 +638,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B5A083442E446263007D4BB0 /* MBProgressHUD */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5A083432E446263007D4BB0 /* XCRemoteSwiftPackageReference "MBProgressHUD" */;
+			productName = MBProgressHUD;
+		};
 		B5A2A0ED2E41E78F001D8C9A /* RxCocoa */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B5A2A0EC2E41E78F001D8C9A /* XCRemoteSwiftPackageReference "RxSwift" */;
