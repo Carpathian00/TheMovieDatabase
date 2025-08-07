@@ -5,10 +5,10 @@ This is a technical test for applying to **Alfagift**. It's a native iOS movie d
 ## Screenshots
 
 ### Home Screen
-![Home Screen](https://img001.prntscr.com/file/img001/4OclIQ7MSF65kl49HKDxoQ.png)
+<img src="https://img001.prntscr.com/file/img001/4OclIQ7MSF65kl49HKDxoQ.png" alt="Home Screen" width="300"/>
 
 ### Movie Details Screen
-![Movie Details](https://img001.prntscr.com/file/img001/2Cidx_ceTcuyG7XrN7vNDA.png)
+<img src="https://img001.prntscr.com/file/img001/2Cidx_ceTcuyG7XrN7vNDA.png" alt="Detail Screen" width="300"/>
 
 ---
 
