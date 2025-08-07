@@ -15,6 +15,7 @@ protocol MovieAndTvRepositoryProtocol {
     func fetchTrailerData(id: Int) -> Single<TrailerResult?>
     func fetchMovieReviews(id: Int, page: Int) -> Single<ReviewModel?>
     func fetchTvReviews(id: Int, page: Int) -> Single<ReviewModel?>
+    func search(query: String?, type: String) -> Single<ApiResponse?>
 }
 
 class MovieAndTvRepository: MovieAndTvRepositoryProtocol {
@@ -136,6 +137,32 @@ class MovieAndTvRepository: MovieAndTvRepositoryProtocol {
 
                 do {
                     let decoded = try JSONDecoder().decode(ReviewModel.self, from: data)
+                    return .just(decoded)
+                } catch {
+                    return .error(error)
+                }
+            }
+    }
+    
+    func search(query: String?, type: String) -> Single<ApiResponse?> {
+        guard let query = query, !query.isEmpty else {
+            return .just(nil)
+        }
+        
+        let url = Endpoint.search(type: type).fullPath
+        let params: [String: Any] = [
+            "api_key": APIConfig.API_KEY,
+            "language": "en-US",
+            "query": query,
+            "page": 1
+        ]
+        
+        return apiService.rx_callApi(method: .GET, url: url, headers: nil, params: params)
+            .flatMap { data -> Single<ApiResponse?> in
+                guard let data = data else { return .just(nil) }
+                
+                do {
+                    let decoded = try JSONDecoder().decode(ApiResponse.self, from: data)
                     return .just(decoded)
                 } catch {
                     return .error(error)

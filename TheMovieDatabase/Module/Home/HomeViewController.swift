@@ -17,9 +17,9 @@ enum HomeCellItem {
     case error(NetworkError)
 }
 
-enum HomeType {
-    case movie
-    case tvShow
+enum HomeType: String {
+    case movie = "movie"
+    case tvShow = "tv"
 }
 
 enum CategoryType: String, CaseIterable {
@@ -30,7 +30,7 @@ enum CategoryType: String, CaseIterable {
 
 class HomeViewController: UIViewController {
     // UI Components
-    private lazy var mainTableView: UITableView = {
+    lazy var mainTableView: UITableView = {
         let table = UITableView()
         table.translatesAutoresizingMaskIntoConstraints = false
         table.separatorStyle = .none
@@ -42,7 +42,7 @@ class HomeViewController: UIViewController {
         return table
     }()
     
-    private let categoryButton: UIButton = {
+    let categoryButton: UIButton = {
         var config = UIButton.Configuration.plain()
         
         // Title
@@ -75,15 +75,23 @@ class HomeViewController: UIViewController {
         return button
     }()
     
-    private let refreshControl = UIRefreshControl()
-    private var categoryButtonTopConstraint: NSLayoutConstraint!
+    let searchBar: UISearchBar = {
+        let bar = UISearchBar()
+        bar.showsCancelButton = false
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        return bar
+    }()
+    
+    var isSearching = false
+    let refreshControl = UIRefreshControl()
+    var categoryButtonTopConstraint: NSLayoutConstraint!
     
     // Data
     let homeType: HomeType
-    let viewModel: HomeViewModel = HomeViewModel(repository: MovieAndTvRepository())
-    private var disposeBag = DisposeBag()
-    private var currentCategory: CategoryType = .popular
-    private let movieEndpoints: [CategoryType: Endpoint.Movie] = [
+    let viewModel: HomeViewModel
+    var disposeBag = DisposeBag()
+    var currentCategory: CategoryType = .popular
+    let movieEndpoints: [CategoryType: Endpoint.Movie] = [
         .popular : .popularMovie,
         .trending : .trendingMovieDay,
         .topRated : .discoverMovie
@@ -104,6 +112,7 @@ class HomeViewController: UIViewController {
     
     init(homeType: HomeType) {
         self.homeType = homeType
+        viewModel = HomeViewModel(repository: MovieAndTvRepository(), homeType: homeType)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -112,16 +121,22 @@ class HomeViewController: UIViewController {
     }
     
     private func setupUI() {
+        searchBar.placeholder = homeType == .movie ? "Search Movies" : "Search TV Shows"
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         mainTableView.refreshControl = refreshControl
         
+        view.addSubview(searchBar)
         view.addSubview(categoryButton)
         view.addSubview(mainTableView)
         
-        categoryButtonTopConstraint = categoryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8)
+        categoryButtonTopConstraint = categoryButton.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 8)
         NSLayoutConstraint.activate([
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+    
             categoryButtonTopConstraint,
-            categoryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            categoryButton.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 8),
             categoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             categoryButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             categoryButton.heightAnchor.constraint(equalToConstant: 44),
@@ -132,10 +147,11 @@ class HomeViewController: UIViewController {
             mainTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
+        searchBar.delegate = self
         setupCategoryMenu()
     }
     
-    private func configEndpointAndHit() {
+    func configEndpointAndHit() {
         viewModel.currentPage = 1
         
         switch homeType {
@@ -160,7 +176,7 @@ class HomeViewController: UIViewController {
         categoryButton.configuration = config
     }
     
-    private func setupCategoryMenu(selected: CategoryType = .popular) {
+    func setupCategoryMenu(selected: CategoryType = .popular) {
         let popularAction = UIAction(title: "Popular", state: selected == .popular ? .on : .off) { [weak self] _ in
             self?.currentCategory = .popular
             self?.configEndpointAndHit()
@@ -185,121 +201,41 @@ class HomeViewController: UIViewController {
     @objc func handleRefresh() {
         self.configEndpointAndHit()
     }
-    
-    private func bindViewModel() {
-        viewModel.items
-            .skip(1)
-            .subscribe(onNext: { [weak self] _ in
-                self?.refreshControl.endRefreshing()
-            })
-            .disposed(by: disposeBag)
-        
-        viewModel.items.bind(to: mainTableView.rx.items) { tableView, row, item in
-            switch item {
-            case .success(let itemData):
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: MovieAndTvTableCell.identifier, for: IndexPath(row: row, section: 0)) as? MovieAndTvTableCell else {
-                    return UITableViewCell()
-                }
-                cell.configure(itemModel: itemData, index: row + 1)
-                
-                return cell
-                
-            case .loading:
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: LoadingCell.identifier, for: IndexPath(row: row, section: 0)) as? LoadingCell else {
-                    return UITableViewCell()
-                }
-                cell.spinner.startAnimating()
-                return cell
-                
-            case .error(let error):
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: ErrorCell.identifier, for: IndexPath(row: row, section: 0)) as? ErrorCell else {
-                    return UITableViewCell()
-                }
-                cell.configure(
-                    logo: UIImage(systemName: "exclamationmark.triangle"),
-                    title: error.description
-                )
-                
-                cell.retryButton.rx.tap.bind { [weak self] in
-                    guard let `self` = self else { return }
-                    self.configEndpointAndHit()
-                }
-                .disposed(by: self.disposeBag)
-                
-                return cell
-            }
-        }
-        .disposed(by: disposeBag)
-        
-        configEndpointAndHit()
+}
+
+extension HomeViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        searchBar.resignFirstResponder()
+    }
+}
+
+extension HomeViewController: UISearchBarDelegate {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(true, animated: true)
+        viewModel.searchText.accept(searchBar.text ?? "")
+        hideCategoryButton()
     }
     
-    private func handleTableModification() {
-        mainTableView.rx.itemSelected
-            .subscribe(onNext: { [weak self] indexPath in
-                guard let self = self else { return }
-                let item = self.viewModel.items.value[indexPath.row]
-                
-                switch item {
-                case .success(let itemData):
-                    guard let id = itemData.id else { return }
-                    
-                    let repo = MovieAndTvRepository()
-                    let vm = DetailViewModel(id: id, type: homeType, repository: repo)
-                    let vc = DetailViewController(viewModel: vm)
-                    navigationController?.pushViewController(vc, animated: true)
-                default:
-                    break
-                }
-            })
-            .disposed(by: disposeBag)
-        
-        mainTableView.rx.willDisplayCell
-            .subscribe(onNext: { [weak self] cell, indexPath in
-                guard let `self` = self else { return }
-                
-                let items = self.viewModel.items.value
-                
-                if indexPath.row == items.count - 1 {
-                    if viewModel.isUpdating == false {
-                        self.viewModel.currentPage += 1
-                        self.viewModel.getMovieList(endpoint: .popularMovie, page: viewModel.currentPage)
-                    }
-                }
-            })
-            .disposed(by: disposeBag)
-        
-        mainTableView.rx.contentOffset
-            .map { $0.y }
-            .distinctUntilChanged()
-            .pairwise()
-            .subscribe(onNext: { [weak self] previous, current in
-                guard let self = self else { return }
-                if current > previous + 10 && current > 0 {
-                    hideCategoryButton()
-                } else if current < previous - 10 {
-                    self.showCategoryButton()
-                }
-            })
-            .disposed(by: disposeBag)
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(false, animated: true)
     }
     
-    private func hideCategoryButton() {
-        guard categoryButtonTopConstraint.constant == 8 else { return }
-        categoryButtonTopConstraint.constant = -60 // Or: -categoryButton.frame.height
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-            self.categoryButton.alpha = 0
-        }
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        isSearching = false
+        viewModel.switchData(isSearching: isSearching)
+        
+        showCategoryButton()
+        searchBar.resignFirstResponder()
+        searchBar.text = ""
+        viewModel.searchText.accept("")
     }
     
-    private func showCategoryButton() {
-        guard categoryButtonTopConstraint.constant != 8 else { return }
-        categoryButtonTopConstraint.constant = 8
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-            self.categoryButton.alpha = 1
-        }
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        isSearching = true
+        viewModel.switchData(isSearching: isSearching)
+        viewModel.searchText.accept(searchBar.text ?? "")
+        hideCategoryButton()
+        searchBar.resignFirstResponder()
     }
 }
 

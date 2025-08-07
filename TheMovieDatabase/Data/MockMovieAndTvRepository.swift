@@ -9,7 +9,6 @@ import RxSwift
 import Foundation
 
 class MockMovieAndTvRepository: MovieAndTvRepositoryProtocol {
-    
     var mockApiResponse: ApiResponse?
     var mockMovieDetail: MovieDetail?
     var mockTvDetail: TVDetail?
@@ -56,5 +55,13 @@ class MockMovieAndTvRepository: MovieAndTvRepositoryProtocol {
             return .error(NSError(domain: "Test", code: -6, userInfo: [NSLocalizedDescriptionKey: "Mock Error"]))
         }
         return .just(mockTvReviewResult)
+    }
+    
+    func search(query: String?, type: String) -> Single<ApiResponse?> {
+        if shouldReturnError {
+            return .error(NSError(domain: "Test", code: -6, userInfo: [NSLocalizedDescriptionKey: "Mock Error"]))
+        }
+        return .just(mockApiResponse)
+
     }
 }

@@ -18,11 +18,23 @@ class HomeViewModel {
     private let disposeBag = DisposeBag()
     
     // Data
+    var temporaryItemData: [HomeCellItem] = []
     let items = BehaviorRelay<[HomeCellItem]>(value: [])
+    let searchText = BehaviorRelay<String>(value: "")
+    let searchedItemList = BehaviorRelay<[HomeCellItem]>(value: [])
     var errorCode: NetworkError? = nil
     
-    init(repository: MovieAndTvRepositoryProtocol) {
+    init(repository: MovieAndTvRepositoryProtocol, homeType: HomeType) {
         self.repository = repository
+        
+        searchText
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] query in
+                guard let self = self else { return }
+                self.search(query: query, type: homeType.rawValue)
+            })
+            .disposed(by: disposeBag)
     }
     
     func getMovieList(endpoint: Endpoint.Movie, page: Int) {
@@ -34,6 +46,8 @@ class HomeViewModel {
     }
     
     private func getItems(endpoint: String, page: Int) {
+        guard searchText.value.isEmpty else { return }
+        
         isUpdating = true
         let params: [String: Any] = [
             "api_key": APIConfig.API_KEY,
@@ -56,7 +70,7 @@ class HomeViewModel {
                     if !(result?.page == result?.totalPages) {
                         newItems += [.loading]
                     }
-
+                    
                     if page == 1 {
                         self.items.accept(newItems)
                     } else {
@@ -74,5 +88,33 @@ class HomeViewModel {
                     isUpdating = false
                 })
             .disposed(by: disposeBag)
+    }
+    
+    func search(query: String?, type: String) {
+        guard let query = query, !query.isEmpty else {
+            searchedItemList.accept([])
+            return
+        }
+        
+        repository.search(query: query, type: type)
+            .observe(on: MainScheduler.instance)
+            .subscribe(onSuccess: { [weak self] result in
+                guard let `self` = self else { return }
+                let newItems = (result?.results ?? []).map { HomeCellItem.success($0) }
+                self.items.accept(newItems)
+            }, onFailure: { [weak self] error in
+                let errorCode = ErrorMapper.map(error)
+                self?.items.accept([.error(errorCode)])
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    func switchData(isSearching: Bool) {
+        if isSearching {
+            temporaryItemData = items.value
+            items.accept([])
+        } else {
+            items.accept(temporaryItemData)
+        }
     }
 }
